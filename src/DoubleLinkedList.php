@@ -2,61 +2,218 @@
 // Double Linked List
 class DoubleLinkedList {
 
+    // the starting point of the whole list.
     private $firstNode;
-    private $lastNode;
+
+    // What node are we currently working on?
+    private $currentNode;
+
+    // just how many nodes do we have? .. may not need this with the count method.
     private $count;
  
  	// traversal direction
  	private $forward = true;
 
     function construct() {
-        $this->firstNode = NULL;
-        $this->lastNode = NULL;
-        $this->count = 0;
+        $this->firstNode    = NULL;
+        $this->currentNode  = NULL;
+        $this->count        = 0;
     }
- 
+
+    /**
+     * This should really return a boolean value. Exception logic here, per the Req, makes it less portable and usable by others.
+     * @return boolean [description]
+     */
     public function isEmpty() {
-        return ($this->firstNode == NULL);
+        if ($this->count() == 0) {
+            throw Exception("The List is Empty");
+        }
     }
  
  	/** add a node to the list */
  	public function add($data) {
  		// how to check the existing data nodes so we can add this one into the correct slot.
+ 		if ($this->firstNode == NULL) {
+ 			$this->firstNode = new ListNode($data);
+ 			$this->firstNode->next = NULL;
+ 			$this->firstNode->prev = NULL; 			
+ 		} else {
+            $node = $this->firstNode;
 
+            // find the data position .. 
+            if ($node->data < $data) {
+                $this->insertAfter($node, $data);
+            } elseif ($node->data > $data) {
+                $this->insertBefore($node, $data);
+            }
+ 		}
  	}
 
- 	/** return the first node in the list */
+ 	/** @return total representing the node count in this list. */
+ 	public function count() {
+ 		$total = 0;
+        $node  = $this->firstNode;
+ 		while ($node != NULL) {
+ 			$total++;
+ 			$node = $node->next;
+ 		}
+ 		return $total;
+ 	}
+
+    public function firstNode() {
+        return $this->firstNode;
+    }
+
+ 	/** return the first nodes data in the list */
 	public function first() {
-
+        if ($this->firstNode == NULL) {
+            throw new Exception('No Data Found. List looks to be empty.');
+        }
+		return $this->firstNode->data;
 	}
 
-	/** return the last node in tehe list */
+	/** return the last node data in the list */
 	public function last() {
+        // I don't believe this is very effecient.
+        $node = $this->currentNode;
 
+        if ($node == NULL) {
+            $node = $this->firstNode;
+        }
+
+        if ($node != NULL) {
+            while ($node->next != NULL) {
+                $node = $node->next;
+            }
+        } else {
+            throw new Exception('No Data Found. List looks to be empty.');
+        }
+
+		return $node->data;
 	}
 
-	/** return the next item in the list. */
+	/** return the next item . */
 	public function next() {
 		// if no next element
-		// throw new Exception('No Next Element');
+        $node = $this->currentNode;
+        if ($node == NULL) {
+            $node = $this->firstNode;
+        } 
+
+        if ($node != NULL && $node->next != NULL) {
+            return $node->next;
+        } else {
+            throw new Exception('No Next Element');
+        }
 	}
 
 	/** return the previous node in the list */
 	public function previous() {
 		// if no previous element
-		// throw new Exception('No Previous Element');
+        if ($this->currentNode       == NULL || 
+            $this->currentNode->prev == NULL) {
+            throw new Exception('No Previous Element');
+        } 
+        return $this->currentNode->prev->data;
 	}
+
+    /** return data from the current Node */
+    public function current() {
+        if ($this->currentNode == NULL) {
+            throw new Exception('No Current Data');
+        }
+        return $this->currentNode->data;
+    }
 
 	/** Reverse the current direction of the list.		
 	 */
 	public function reverse() {
-		$this->forward = !$forward;
+		$this->forward = !$this->forward;
 	}
 
 	/** Check the current direction of the list operations */
 	public function isForward() {
-		return $forward;
+		return $this->forward;
 	}
+
+    /** checks to see if a function you want to use is returning data or tossing an exception. */
+    public function valid($function) {
+        $callable = true;
+        try {
+            call_user_func($function);
+        } catch (Exception $e) {
+            $callable = false;
+        }
+        return $callable;
+    }
+
+    /* insert data after the specified node */
+    private function insertAfter($node, $data) {
+
+        if ($node->next == NULL) {
+
+            $newNode = new ListNode($data);
+            $newNode->prev = $node;
+            $newNode->next = NULL;
+
+            $node->next        = $newNode;
+            $this->currentNode = $newNode;
+
+        } elseif ($node->next->data > $data) {
+            // insert here.
+            $newNode = new ListNode($data);
+
+            // placeholder to make it easier to insert here.
+            $nodeNext = $node->next;
+
+            // Re-Assign nodes
+            $newNode->prev = $node;
+            $newNode->next = $nodeNext;
+
+            $node->next     = $newNode;
+            $nodeNext->prev = $newNode;
+
+            $this->currentNode = $newNode;
+
+        } elseif ($node->next->data < $data) {
+            $this->insertAfter($node->next, $data);
+        }
+    }
+
+    /* insert data before the given node */
+    private function insertBefore($node, $data) {
+
+        if ($node->prev == NULL) {
+            $newNode = new ListNode($data);
+            $newNode->next = $node;
+            $newNode->prev = NULL;
+
+            $node->prev        = $newNode;
+            $this->firstNode   = $newNode;
+            $this->currentNode = $newNode;
+
+        } elseif ($node->prev->data < $data) {
+            // insert here.
+            $newNode = new ListNode($data);
+
+            // placeholder to make it easier to insert here.
+            $nodePrev = $node->prev;
+
+            // Re-Assign nodes
+            $newNode->prev = $nodePrev;
+            $newNode->next = $node;
+
+            $node->prev     = $newNode;
+            $nodePrev->next = $newNode;
+
+            $this->currentNode = $newNode;
+
+        } elseif ($node->prev->data > $data) {
+
+            $this->insertBefore($node->prev, $data);
+
+        }
+    }
 
 }
 ?>
