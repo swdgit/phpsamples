@@ -34,9 +34,7 @@ class DoubleLinkedList {
  	public function add($data) {
  		// how to check the existing data nodes so we can add this one into the correct slot.
  		if ($this->firstNode == NULL) {
- 			$this->firstNode = new ListNode($data);
- 			$this->firstNode->next = NULL;
- 			$this->firstNode->prev = NULL; 			
+ 			$this->firstNode = $this->newNode($data, NULL, NULL);
  		} else {
             $node = $this->firstNode;
 
@@ -49,7 +47,7 @@ class DoubleLinkedList {
  		}
  	}
 
- 	/** @return total representing the node count in this list. */
+ 	/** total representing the node count in this list. */
  	public function count() {
  		$total = 0;
         $node  = $this->firstNode;
@@ -60,20 +58,13 @@ class DoubleLinkedList {
  		return $total;
  	}
 
+    /** get the first node from the list.  */
     public function firstNode() {
         return $this->firstNode;
     }
 
- 	/** return the first nodes data in the list */
-	public function first() {
-        if ($this->firstNode == NULL) {
-            throw new Exception('No Data Found. List looks to be empty.');
-        }
-		return $this->firstNode->data;
-	}
-
-	/** return the last node data in the list */
-	public function last() {
+    /** get at the last node. */
+    public function lastNode() {
         // I don't believe this is very effecient.
         $node = $this->currentNode;
 
@@ -89,26 +80,47 @@ class DoubleLinkedList {
             throw new Exception('No Data Found. List looks to be empty.');
         }
 
-		return $node->data;
+        return $node;
+    }
+
+ 	/** return the first nodes data in the list */
+	public function first() {
+        if (!$forward) {
+            return $this->last();
+        }
+        if ($this->firstNode == NULL) {
+            throw new Exception('No Data Found. List looks to be empty.');
+        }
+		return $this->firstNode->data;
+	}
+
+	/** return the last node data in the list */
+	public function last() {
+        if (!$this->forward) {
+            return $this->first();
+        }
+		return $this->lastNode()->data;
 	}
 
 	/** return the next item . */
 	public function next() {
-		// if no next element
-        $node = $this->currentNode;
-        if ($node == NULL) {
-            $node = $this->firstNode;
-        } 
-
-        if ($node != NULL && $node->next != NULL) {
-            return $node->next;
-        } else {
-            throw new Exception('No Next Element');
+        if (!$this->forward) {
+            return $this->previous();
         }
+        // if no previous element
+        if ($this->currentNode       == NULL || 
+            $this->currentNode->next == NULL) {
+            throw new Exception('No Next Element');
+        } 
+        return $this->currentNode->next->data;
 	}
 
 	/** return the previous node in the list */
 	public function previous() {
+
+        if (!$this->forward) {
+            return $this->next();
+        }
 		// if no previous element
         if ($this->currentNode       == NULL || 
             $this->currentNode->prev == NULL) {
@@ -125,11 +137,30 @@ class DoubleLinkedList {
         return $this->currentNode->data;
     }
 
-	/** Reverse the current direction of the list.		
-	 */
+	/** Reverse the current direction of the list. */
 	public function reverse() {
 		$this->forward = !$this->forward;
 	}
+
+    /** If I understand the last request, all nodes need to be reversed. e.g. reverse sort. */
+    public function reverseList() {
+
+        $current = $this->firstNode;
+        $temp    = NULL;
+        while ($current != NULL) {
+
+            $temp = $current->prev;
+            
+            $current->prev = $current->next;
+            $current->next = $temp;
+            $current = $current->prev;
+
+        }
+
+        if ($temp != NULL) {
+            $this->firstNode = $temp->prev;
+        }
+    }
 
 	/** Check the current direction of the list operations */
 	public function isForward() {
@@ -151,10 +182,7 @@ class DoubleLinkedList {
     private function insertAfter($node, $data) {
 
         if ($node->next == NULL) {
-
-            $newNode = new ListNode($data);
-            $newNode->prev = $node;
-            $newNode->next = NULL;
+            $newNode = $this->newNode($data, $node, NULL);
 
             $node->next        = $newNode;
             $this->currentNode = $newNode;
@@ -184,9 +212,7 @@ class DoubleLinkedList {
     private function insertBefore($node, $data) {
 
         if ($node->prev == NULL) {
-            $newNode = new ListNode($data);
-            $newNode->next = $node;
-            $newNode->prev = NULL;
+            $newNode = $this->newNode($data, NULL, $node);
 
             $node->prev        = $newNode;
             $this->firstNode   = $newNode;
@@ -215,5 +241,12 @@ class DoubleLinkedList {
         }
     }
 
+    private function newNode($data, $prev, $next) {
+        $newNode = new ListNode($data);
+        $newNode->prev = $prev;
+        $newNode->next = $next;
+
+        return $newNode;
+    }
 }
 ?>
