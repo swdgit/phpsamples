@@ -15,7 +15,5 @@ MCN Healthcare PHP test code
 * Implement a valid() method for the list that returns true if the  current method will return valid data, false otherwise.
 * Implement a next() method for the list that returns the data for the next list element.
 * Implement a previous() method for the list that returns the data for the previous list element.
-
 * Implement a reverse() method for the list that causes the first, last, next, and previous methods to return data in reverse order.
-
 * Would like list reversal to be implemented with constant time complexity O(4), however linear complexity O(4n) is acceptable.
