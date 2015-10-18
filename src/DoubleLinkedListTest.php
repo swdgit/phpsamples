@@ -4,9 +4,10 @@
     require 'DoubleLinkedList.php';
 
     $dll = new DoubleLinkedList();
-    echo "valid call " . $dll->valid("first") . "\r\n";
+
     $dll->add(4);
-    print 'first : ' . $dll->first() . "\r\n";
+
+    //echo "valid call " . $dll->valid("current") . "\r\n";
 
     $dll->add(1);
     
@@ -29,6 +30,19 @@
     while ($node != null) {
         print $node->data . "\r\n";
         $node = $node->next;
+    }
+
+    $dll->reverse(); // this just allows reverse access to parts of the list. 
+
+    $dll->reverseList();
+
+    print "Reverse the List : \r\n";
+
+    $aNode = $dll->firstNode();
+
+    while ($aNode != null) {
+        print $aNode->data . "\r\n";
+        $aNode = $aNode->next;
     }
 
     print '';
